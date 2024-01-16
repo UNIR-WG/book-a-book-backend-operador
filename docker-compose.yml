@@ -1,0 +1,27 @@
+---
+version: "2.1"
+services:
+  book-a-book-buscador:
+    image: aleixmt/book-a-book-buscador:latest
+    ports:
+      - "0.0.0.0:8082:8081"
+    #restart: unless-stopped
+
+  book-a-book-operador:
+    image: aleixmt/book-a-book-operador:latest
+    ports:
+      - "0.0.0.0:8084:8083"
+    #restart: unless-stopped
+
+  postgres_db:
+    image: postgres
+    environment:
+      - PUID=1001
+      - PGID=1001
+      - TZ=Etc/UTC
+      - POSTGRES_PASSWORD=chemistry
+      - POSTGRES_USER=aleixmt
+      - POSTGRES_DB=book-a-book-operador
+    ports:
+      - "0.0.0.0:5433:5432"
+    restart: unless-stopped

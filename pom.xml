@@ -11,6 +11,7 @@
 	<groupId>net.unir.missi.desarrollowebfullstack.bookabook</groupId>
 	<artifactId>operador</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
 	<name>operador</name>
 	<description>Operador microservice for the Book a book web application</description>
 	<properties>
@@ -42,6 +43,8 @@
 	</dependencies>
 
 	<build>
+		<finalName>book-a-book-operador</finalName>  <!-- Final name for the WAR artifact -->
+
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
