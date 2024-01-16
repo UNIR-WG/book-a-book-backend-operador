@@ -1,23 +1,13 @@
 ---
 version: "2.1"
 services:
-  book-a-book-buscador:
-    image: aleixmt/book-a-book-buscador:latest
-    ports:
-      - "0.0.0.0:8082:8081"
-    #restart: unless-stopped
-
-  book-a-book-operador:
-    image: aleixmt/book-a-book-operador:latest
-    ports:
-      - "0.0.0.0:8084:8083"
-    #restart: unless-stopped
 
   book-a-book-eureka:
     image: aleixmt/book-a-book-eureka:latest
     ports:
       - "0.0.0.0:8762:8761"
     restart: unless-stopped
+
 
   postgres_operador:
     image: postgres
@@ -44,3 +34,24 @@ services:
     ports:
       - "0.0.0.0:5433:5432"
     restart: unless-stopped
+
+
+  book-a-book-buscador:
+    image: aleixmt/book-a-book-buscador:latest
+    ports:
+      - "0.0.0.0:8082:8081"
+    depends_on:
+      - book-a-book-eureka
+      - postgres_buscador
+    #restart: unless-stopped
+
+  book-a-book-operador:
+    image: aleixmt/book-a-book-operador:latest
+    ports:
+      - "0.0.0.0:8084:8083"
+    depends_on:
+      - book-a-book-eureka
+      - postgres_operador
+    #restart: unless-stopped
+
+
