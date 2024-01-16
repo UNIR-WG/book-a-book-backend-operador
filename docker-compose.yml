@@ -7,6 +7,11 @@ services:
     ports:
       - "0.0.0.0:8762:8761"
     restart: unless-stopped
+    healthcheck:
+      test: curl --fail http://localhost:8761 || exit 1
+      interval: 60s
+      retries: 3
+      timeout: 10s
 
 
   postgres_operador:
@@ -43,7 +48,7 @@ services:
     depends_on:
       - book-a-book-eureka
       - postgres_buscador
-    #restart: unless-stopped
+    restart: unless-stopped
 
   book-a-book-operador:
     image: aleixmt/book-a-book-operador:latest
@@ -52,6 +57,6 @@ services:
     depends_on:
       - book-a-book-eureka
       - postgres_operador
-    #restart: unless-stopped
+    restart: unless-stopped
 
 
