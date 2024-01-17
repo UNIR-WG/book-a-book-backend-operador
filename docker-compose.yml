@@ -8,10 +8,11 @@ services:
       - "0.0.0.0:8762:8761"
     restart: unless-stopped
     healthcheck:
-      test: ["curl --fail --silent localhost:8761/actuator/health | grep UP || exit 1"]
-      interval: 60s
+      test: ["CMD-SHELL", "curl --fail --silent localhost:8761/actuator/health | grep -q UP"]
+      interval: 15s
       retries: 5
       timeout: 10s
+      start_period: 5s
 
 
   postgres_operador:
@@ -49,7 +50,7 @@ services:
       book-a-book-eureka:
         condition: service_healthy
       postgres_buscador:
-        condition: service_healthy
+        condition: service_started
     restart: unless-stopped
 
   book-a-book-operador:
@@ -60,7 +61,7 @@ services:
       book-a-book-eureka:
         condition: service_healthy
       postgres_operador:
-        condition: service_healthy
+        condition: service_started
     restart: unless-stopped
 
 
