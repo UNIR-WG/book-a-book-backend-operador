@@ -43,6 +43,7 @@ jobs:
 
     steps:
       -
+        name: deploy to railway
         uses: bervProject/railway-deploy@main
         with:
           railway_token: ${{ secrets.RAILWAY_TOKEN }}
