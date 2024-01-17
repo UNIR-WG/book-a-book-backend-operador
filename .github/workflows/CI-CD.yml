@@ -42,7 +42,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      uses: bervProject/railway-deploy@main
-      with:
-        railway_token: ${{ secrets.RAILWAY_TOKEN }}
-        service: "book-a-book-operador"
+      -
+        uses: bervProject/railway-deploy@main
+        with:
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+          service: "book-a-book-operador"
