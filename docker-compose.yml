@@ -7,6 +7,7 @@ services:
     ports:
       - "0.0.0.0:8762:8761"
     restart: unless-stopped
+    pull_policy: always
     healthcheck:
       test: ["CMD-SHELL", "curl --fail --silent localhost:8761/actuator/health | grep -q UP"]
       interval: 15s
@@ -51,7 +52,8 @@ services:
         condition: service_healthy
       postgres_buscador:
         condition: service_started
-    restart: unless-stopped
+    #restart: unless-stopped
+    pull_policy: always
 
   book-a-book-operador:
     image: aleixmt/book-a-book-operador:latest
@@ -62,6 +64,7 @@ services:
         condition: service_healthy
       postgres_operador:
         condition: service_started
-    restart: unless-stopped
+    #restart: unless-stopped
+    pull_policy: always
 
 
