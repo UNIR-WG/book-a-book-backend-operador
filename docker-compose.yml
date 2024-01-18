@@ -15,7 +15,6 @@ services:
       timeout: 10s
       start_period: 5s
 
-
   postgres_operador:
     image: postgres
     environment:
