@@ -1,6 +1,6 @@
 package net.unir.missi.desarrollowebfullstack.bookabook.operador.controller;
 
-import net.unir.missi.desarrollowebfullstack.bookabook.operador.config.BuscadorClient;
+import net.unir.missi.desarrollowebfullstack.bookabook.operador.clients.HelloClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -12,7 +12,7 @@ public class GreetController {
 
     @Autowired
     @Lazy
-    private BuscadorClient buscadorClient;
+    private HelloClient helloClient;
 
     @Value("${spring.application.name}")
     private String appName;
@@ -20,6 +20,6 @@ public class GreetController {
     @RequestMapping("/greeting")
     public String greeting() {
         return String.format(
-                "Operador says hello to buscador, buscador replies back saying '%s'!", buscadorClient.hello());
+                "Operador says hello to buscador, buscador replies back saying '%s'!", helloClient.hello());
     }
 }
