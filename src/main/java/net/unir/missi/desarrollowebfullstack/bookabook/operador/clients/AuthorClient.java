@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
-@FeignClient(name = "buscador")
+@FeignClient(name = "authorClient")
 public interface AuthorClient {
 
     @GetMapping("/authors")

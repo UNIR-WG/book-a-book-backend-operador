@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class GreetController {
 
-    @Autowired
     @Lazy
+    @Autowired
     private HelloClient helloClient;
 
     @Value("${spring.application.name}")

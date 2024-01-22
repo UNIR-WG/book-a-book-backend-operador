@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@FeignClient(name = "buscador")
+@FeignClient(name = "bookClient")
 public interface BookClient {
 
     @GetMapping("/books")
