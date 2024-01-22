@@ -15,7 +15,7 @@ public interface BuscadorClient {
     // Authors
 
     @GetMapping("/authors")
-    ResponseEntity<List<AuthorRequest>> getAuthors(
+    ResponseEntity<List<AuthorResponse>> getAuthors(
             @RequestParam(required = false) String firstName,
             @RequestParam(required = false) String lastName,
             @RequestParam(required = false) LocalDate birthDate,
@@ -26,19 +26,19 @@ public interface BuscadorClient {
             @RequestParam(required = false) Long bookId);
 
     @GetMapping("/authors/{idAuthor}")
-    ResponseEntity<AuthorRequest> getAuthorById(@PathVariable String idAuthor);
+    ResponseEntity<AuthorResponse> getAuthorById(@PathVariable String idAuthor);
 
     @PostMapping("/authors")
-    ResponseEntity<AuthorRequest> addAuthor(@RequestBody AuthorRequest authorRequested);
+    ResponseEntity<AuthorResponse> addAuthor(@RequestBody AuthorRequest authorRequested);
 
     @PutMapping("/authors/{idAuthor}")
-    ResponseEntity<AuthorRequest> modifyAllAuthorData(@PathVariable String idAuthor, @RequestBody AuthorRequest authorData);
+    ResponseEntity<AuthorResponse> modifyAllAuthorData(@PathVariable String idAuthor, @RequestBody AuthorRequest authorData);
 
     @PatchMapping("/authors/{idAuthor}")
-    ResponseEntity<AuthorRequest> modifyAuthorData(@PathVariable String idAuthor, @RequestBody String authorData);
+    ResponseEntity<AuthorResponse> modifyAuthorData(@PathVariable String idAuthor, @RequestBody String authorData);
 
     @DeleteMapping("/authors/{idAuthor}")
-    ResponseEntity<AuthorRequest> deleteAuthor(@PathVariable String idAuthor);
+    ResponseEntity<AuthorResponse> deleteAuthor(@PathVariable String idAuthor);
 
     // Books
 
@@ -70,7 +70,7 @@ public interface BuscadorClient {
     // Clients
 
     @GetMapping(value = "/clients")
-    ResponseEntity<List<ClientDto>> getFilterClients(
+    ResponseEntity<List<ClientResponse>> getFilterClients(
             @RequestParam(required = false) String firstName,
             @RequestParam(required = false) String lastName,
             @RequestParam(required = false) String address,
@@ -78,19 +78,19 @@ public interface BuscadorClient {
             @RequestParam(required = false) String email);
 
     @GetMapping("/clients/{clientId}")
-    ResponseEntity<ClientDto> getClient(@PathVariable String clientId);
+    ResponseEntity<ClientResponse> getClient(@PathVariable String clientId);
 
     @PostMapping("/clients")
-    ResponseEntity<ClientDto> addBook(@RequestBody ClientDto requestClient);
+    ResponseEntity<ClientResponse> addBook(@RequestBody ClientRequest requestClient);
 
     @DeleteMapping("/clients/{clientId}")
     ResponseEntity<DeleteResponse> deleteClient(@PathVariable String clientId);
 
     @PutMapping("/clients/{clientId}")
-    ResponseEntity<ClientDto> updateClient(@PathVariable String clientId, @RequestBody ClientDto client);
+    ResponseEntity<ClientResponse> updateClient(@PathVariable String clientId, @RequestBody ClientRequest client);
 
     @PatchMapping("/clients/{clientId}")
-    ResponseEntity<ClientDto> updateClientAttribute(@PathVariable String clientId, @RequestBody String requestClientAttribute);
+    ResponseEntity<ClientResponse> updateClientAttribute(@PathVariable String clientId, @RequestBody String requestClientAttribute);
 
     // Hello
 

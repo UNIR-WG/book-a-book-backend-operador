@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 @ToString
-public class ClientDto {
+public class ClientRequest {
 
     private String firstName;
     private String lastName;

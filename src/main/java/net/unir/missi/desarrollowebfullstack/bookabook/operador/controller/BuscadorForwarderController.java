@@ -2,8 +2,6 @@ package net.unir.missi.desarrollowebfullstack.bookabook.operador.controller;
 
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.clients.BuscadorClient;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Delega todas las llamadas del buscador hacia el buscador. Se usa solo en el modo de desarrollador
@@ -30,7 +27,7 @@ public class BuscadorForwarderController {
     // DELEGATES
 
     @GetMapping("/authors")
-    public ResponseEntity<List<AuthorRequest>> getAuthors(
+    public ResponseEntity<List<AuthorResponse>> getAuthors(
             @RequestParam(required = false) String firstName,
             @RequestParam(required = false) String lastName,
             @RequestParam(required = false) LocalDate birthDate,
@@ -43,27 +40,27 @@ public class BuscadorForwarderController {
     }
 
     @GetMapping("/authors/{idAuthor}")
-    public ResponseEntity<AuthorRequest> getAuthorById(@PathVariable String idAuthor) {
+    public ResponseEntity<AuthorResponse> getAuthorById(@PathVariable String idAuthor) {
         return buscadorClient.getAuthorById(idAuthor);
     }
 
     @PostMapping("/authors")
-    public ResponseEntity<AuthorRequest> addAuthor(@RequestBody AuthorRequest authorRequested) {
+    public ResponseEntity<AuthorResponse> addAuthor(@RequestBody AuthorRequest authorRequested) {
         return buscadorClient.addAuthor(authorRequested);
     }
 
     @PutMapping("/authors/{idAuthor}")
-    public ResponseEntity<AuthorRequest> modifyAllAuthorData(@PathVariable String idAuthor, @RequestBody AuthorRequest authorData) {
+    public ResponseEntity<AuthorResponse> modifyAllAuthorData(@PathVariable String idAuthor, @RequestBody AuthorRequest authorData) {
         return buscadorClient.modifyAllAuthorData(idAuthor, authorData);
     }
 
     @PatchMapping("/authors/{idAuthor}")
-    public ResponseEntity<AuthorRequest> modifyAuthorData(@PathVariable String idAuthor, @RequestBody String authorData) {
+    public ResponseEntity<AuthorResponse> modifyAuthorData(@PathVariable String idAuthor, @RequestBody String authorData) {
         return buscadorClient.modifyAuthorData(idAuthor, authorData);
     }
 
     @DeleteMapping("/authors/{idAuthor}")
-    public ResponseEntity<AuthorRequest> deleteAuthor(@PathVariable String idAuthor) {
+    public ResponseEntity<AuthorResponse> deleteAuthor(@PathVariable String idAuthor) {
         return buscadorClient.deleteAuthor(idAuthor);
     }
 
@@ -105,7 +102,7 @@ public class BuscadorForwarderController {
     }
 
     @GetMapping("/clients")
-    public ResponseEntity<List<ClientDto>> getFilterClients(
+    public ResponseEntity<List<ClientResponse>> getFilterClients(
             @RequestParam(required = false) String firstName,
             @RequestParam(required = false) String lastName,
             @RequestParam(required = false) String address,
@@ -115,12 +112,12 @@ public class BuscadorForwarderController {
     }
 
     @GetMapping("/clients/{clientId}")
-    public ResponseEntity<ClientDto> getClient(@PathVariable String clientId) {
+    public ResponseEntity<ClientResponse> getClient(@PathVariable String clientId) {
         return buscadorClient.getClient(clientId);
     }
 
     @PostMapping("/clients")
-    public ResponseEntity<ClientDto> addBook(@RequestBody ClientDto requestClient) {
+    public ResponseEntity<ClientResponse> addBook(@RequestBody ClientRequest requestClient) {
         return buscadorClient.addBook(requestClient);
     }
 
@@ -130,12 +127,12 @@ public class BuscadorForwarderController {
     }
 
     @PutMapping("/clients/{clientId}")
-    public ResponseEntity<ClientDto> updateClient(@PathVariable String clientId, @RequestBody ClientDto client) {
+    public ResponseEntity<ClientResponse> updateClient(@PathVariable String clientId, @RequestBody ClientRequest client) {
         return buscadorClient.updateClient(clientId, client);
     }
 
     @PatchMapping("/clients/{clientId}")
-    public ResponseEntity<ClientDto> updateClientAttribute(@PathVariable String clientId, @RequestBody String requestClientAttribute) {
+    public ResponseEntity<ClientResponse> updateClientAttribute(@PathVariable String clientId, @RequestBody String requestClientAttribute) {
         return buscadorClient.updateClientAttribute(clientId, requestClientAttribute);
     }
 
