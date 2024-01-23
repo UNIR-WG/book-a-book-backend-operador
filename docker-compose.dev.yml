@@ -25,7 +25,7 @@ services:
       - POSTGRES_USER=aleixmt
       - POSTGRES_DB=book-a-book-operador
     ports:
-      - "0.0.0.0:5434:5432"
+      - "0.0.0.0:5432:5432"
     restart: unless-stopped
 
   postgres_buscador:
