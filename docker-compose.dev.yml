@@ -41,18 +41,6 @@ services:
       - "0.0.0.0:5433:5432"
     restart: unless-stopped
 
-  book-a-book-operador:
-    image: aleixmt/book-a-book-operador:latest
-    pull_policy: always
-    ports:
-      - "0.0.0.0:8084:8081"
-    depends_on:
-      book-a-book-eureka:
-        condition: service_healthy
-      postgres_buscador:
-        condition: service_started
-    #restart: unless-stopped
-
   book-a-book-buscador:
     image: aleixmt/book-a-book-buscador:latest
     ports:
