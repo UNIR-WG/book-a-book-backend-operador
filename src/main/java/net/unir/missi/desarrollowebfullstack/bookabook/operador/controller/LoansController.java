@@ -7,7 +7,6 @@ import net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api.LoanRe
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api.LoanResponse;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.service.LoanService;
 
-import org.apache.http.protocol.ResponseServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +52,9 @@ public class LoansController {
     public ResponseEntity<LoanResponse> addLoan(@RequestBody LoanRequest loanRequest) {
         try {
             if(loanRequest != null) {
+                if(!service.validateLoan(loanRequest)) {
+                    return ResponseEntity.notFound().build();
+                }
                 LoanResponse newLoan = service.createLoan(loanRequest);
                 return ResponseEntity.status(HttpStatus.CREATED).body(newLoan);
             }
@@ -61,6 +63,28 @@ public class LoansController {
                 return ResponseEntity.badRequest().build();
             }
         } catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/loans/{id}")
+    public ResponseEntity<LoanResponse> getLoanById(Long id) {
+        try {
+            LoanResponse response = service.getLoanById(id);
+            return ResponseEntity.ok(response);
+        }
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/loans/client/{clientId}")
+    public ResponseEntity<List<LoanResponse>> getLoanByClientId(Long clientId) {
+        try {
+            List<LoanResponse> response = service.getLoansByClientId(clientId);
+            return ResponseEntity.ok(Objects.requireNonNullElse(response, Collections.emptyList()));
+        }
+        catch(Exception e) {
             return ResponseEntity.internalServerError().build();
         }
     }
