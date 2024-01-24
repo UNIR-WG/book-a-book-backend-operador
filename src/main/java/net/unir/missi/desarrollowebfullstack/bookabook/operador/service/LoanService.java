@@ -42,26 +42,7 @@ public class LoanService implements ILoanService {
             else
                 loanList = loanRepository.findAll();
 
-            List<LoanResponse> loansResponse = new ArrayList<>();
-
-            if(loanList != null) {
-                for(Loan loan : loanList) {
-                    LoanResponse loanResponse = LoanResponse.builder()
-
-                            .bookId(loan.getBookId())
-                            .clientId(loan.getClientId())
-                            .loanDate(loan.getLoanDate())
-                            .dueDate(loan.getDueDate())
-                            .returnDate(loan.getReturnDate())
-                            .isReturned(loan.getIsReturned())
-                            .renewalCount(loan.getRenewalCount())
-                            .build();
-
-                    loansResponse.add(loanResponse);
-                }
-            }
-
-            return loansResponse.isEmpty() ? null : loansResponse;
+            return getLoanResponses(loanList);
         }
         catch(Exception e) {
             throw new RuntimeException("Database failed: " + e.getMessage());
@@ -109,12 +90,49 @@ public class LoanService implements ILoanService {
 
     @Override
     public LoanResponse getLoanById(Long id) throws RuntimeException {
+        Loan loan = loanRepository.findById(id);
+        if(loan != null) {
+            return LoanResponse.builder()
+                    .id(loan.getId())
+                    .bookId(loan.getBookId())
+                    .clientId(loan.getClientId())
+                    .loanDate(loan.getLoanDate())
+                    .dueDate(loan.getDueDate())
+                    .returnDate(loan.getReturnDate())
+                    .isReturned(loan.getIsReturned())
+                    .renewalCount(loan.getRenewalCount())
+                    .build();
+        }
         return null;
     }
 
     @Override
     public List<LoanResponse> getLoansByClientId(Long clientId) throws RuntimeException {
-        return null;
+        List<Loan> loansList = loanRepository.findByClientId(clientId);
+        return getLoanResponses(loansList);
+    }
+
+    private List<LoanResponse> getLoanResponses(List<Loan> loansList) {
+        List<LoanResponse> loansResponse = new ArrayList<>();
+
+        if(loansList != null) {
+            for(Loan loan : loansList) {
+                LoanResponse loanResponse = LoanResponse.builder()
+                        .id(loan.getId())
+                        .bookId(loan.getBookId())
+                        .clientId(loan.getClientId())
+                        .loanDate(loan.getLoanDate())
+                        .dueDate(loan.getDueDate())
+                        .returnDate(loan.getReturnDate())
+                        .isReturned(loan.getIsReturned())
+                        .renewalCount(loan.getRenewalCount())
+                        .build();
+
+                loansResponse.add(loanResponse);
+            }
+        }
+
+        return loansResponse.isEmpty() ? null : loansResponse;
     }
 
     @Override

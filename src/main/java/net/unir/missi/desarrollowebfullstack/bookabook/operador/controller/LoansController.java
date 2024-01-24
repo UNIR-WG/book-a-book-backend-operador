@@ -64,4 +64,26 @@ public class LoansController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @GetMapping("/loans/{id}")
+    public ResponseEntity<LoanResponse> getLoanById(Long id) {
+        try {
+            LoanResponse response = service.getLoanById(id);
+            return ResponseEntity.ok(response);
+        }
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/loans/client/{clientId}")
+    public ResponseEntity<List<LoanResponse>> getLoanByClientId(Long clientId) {
+        try {
+            List<LoanResponse> response = service.getLoansByClientId(clientId);
+            return ResponseEntity.ok(Objects.requireNonNullElse(response, Collections.emptyList()));
+        }
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }
