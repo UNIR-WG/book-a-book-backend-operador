@@ -70,6 +70,40 @@ public class LoanService implements ILoanService {
 
     @Override
     public LoanResponse createLoan(LoanRequest request) throws RuntimeException {
+            if(request != null
+                    && request.getBookId() != 0
+                    && request.getClientId() != 0
+                    && request.getLoanDate() != null
+                    && request.getDueDate() != null
+                    && request.getReturnDate() != null
+                    && request.getIsReturned() != null
+                    && request.getRenewalCount() != null
+
+            ) {
+                Loan newLoan = Loan.builder()
+                        .bookId(request.getBookId())
+                        .clientId(request.getClientId())
+                        .loanDate(request.getLoanDate())
+                        .dueDate(request.getDueDate())
+                        .returnDate(request.getReturnDate())
+                        .isReturned(request.getIsReturned())
+                        .renewalCount(request.getRenewalCount())
+                        .build();
+
+                Loan createdLoan = loanRepository.save(newLoan);
+
+                return LoanResponse.builder()
+                        .id(createdLoan.getId())
+                        .bookId(createdLoan.getBookId())
+                        .clientId(createdLoan.getClientId())
+                        .loanDate(createdLoan.getLoanDate())
+                        .returnDate(createdLoan.getReturnDate())
+                        .dueDate(createdLoan.getDueDate())
+                        .isReturned(createdLoan.getIsReturned())
+                        .renewalCount(createdLoan.getRenewalCount()).build();
+
+            }
+
         return null;
     }
 
