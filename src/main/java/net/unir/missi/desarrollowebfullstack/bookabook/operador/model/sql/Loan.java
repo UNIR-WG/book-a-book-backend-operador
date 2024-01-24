@@ -1,7 +1,5 @@
 package net.unir.missi.desarrollowebfullstack.bookabook.operador.model.sql;
 
-
-import lombok.*;
 import java.util.Date;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
