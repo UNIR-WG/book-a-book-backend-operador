@@ -7,7 +7,6 @@ import net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api.LoanRe
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api.LoanResponse;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.service.LoanService;
 
-import org.apache.http.protocol.ResponseServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +52,9 @@ public class LoansController {
     public ResponseEntity<LoanResponse> addLoan(@RequestBody LoanRequest loanRequest) {
         try {
             if(loanRequest != null) {
+                if(!service.validateLoan(loanRequest)) {
+                    return ResponseEntity.notFound().build();
+                }
                 LoanResponse newLoan = service.createLoan(loanRequest);
                 return ResponseEntity.status(HttpStatus.CREATED).body(newLoan);
             }
