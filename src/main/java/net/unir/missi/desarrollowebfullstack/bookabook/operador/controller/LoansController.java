@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api.LoanRequest;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api.LoanResponse;
-import net.unir.missi.desarrollowebfullstack.bookabook.operador.service.LoanService;
+import net.unir.missi.desarrollowebfullstack.bookabook.operador.service.LoanServiceImpl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,7 +19,7 @@ import java.util.*;
 @Slf4j
 public class LoansController {
     @Autowired
-    private final LoanService service;
+    private final LoanServiceImpl service;
 
     @GetMapping("/loans")
     public ResponseEntity<List<LoanResponse>> getAllLoans(
