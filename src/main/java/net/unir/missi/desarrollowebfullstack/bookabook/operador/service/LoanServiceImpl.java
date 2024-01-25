@@ -2,6 +2,7 @@ package net.unir.missi.desarrollowebfullstack.bookabook.operador.service;
 
 import lombok.extern.slf4j.Slf4j;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.clients.BuscadorClient;
+import net.unir.missi.desarrollowebfullstack.bookabook.operador.config.LoanMerger;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.config.LoanRequestToLoanConverter;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.config.LoanToLoanResponseConverter;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.exceptions.BadParametersException;
@@ -48,29 +49,30 @@ public class LoanServiceImpl implements LoanService {
     @Autowired
     private LoanToLoanResponseConverter loanToLoanResponseConverter;
 
+    @Autowired
+    private LoanMerger loanMerger;
+
     // CRUD
 
     @Override
     public List<LoanResponse> getAllLoans(Long bookId, Long clientId, Date loanDate, Date returnDate, Date dueDate, Boolean isReturned, Integer renewalCount) {
         Loan loan = new Loan(null, bookId, clientId, loanDate, returnDate, dueDate, isReturned, renewalCount);
         List<Loan> loanList;
-        try {
-            if (this.isValidSyntaxLoanForNulls(loan)) {
-                loanList = loanRepository.search(bookId, clientId, loanDate, returnDate, dueDate, isReturned, renewalCount);
-            }
-            else {
-                loanList = loanRepository.findAll();
-            }
-            return loanList.stream().map((Loan l) -> this.loanToLoanResponseConverter.convert(l)).collect(Collectors.toList());
+        if (this.isValidSyntaxLoanForNulls(loan)) {
+            loanList = loanRepository.search(bookId, clientId, loanDate, returnDate, dueDate, isReturned, renewalCount);
         }
-        catch(Exception e) {
-            throw new RuntimeException("Database failed: " + e.getMessage());
+        else {
+            loanList = loanRepository.findAll();
         }
+        return loanList.stream().map((Loan l) -> this.loanToLoanResponseConverter.convert(l)).collect(Collectors.toList());
     }
 
     @Override
     public LoanResponse createLoan(LoanRequest request) {
+        // Convert to in-memory loan
         Loan loan = this.loanRequestToLoanConverter.convert(request);
+
+        // If loan has null values or wrong values throw 400
         if (
                 ! this.isValidSyntaxLoanForNulls(Objects.requireNonNull(loan))
                 || ! this.isValidSyntaxLoanForZeroes(loan))
@@ -78,21 +80,26 @@ public class LoanServiceImpl implements LoanService {
             throw new BadParametersException("One or more parameters of the request are wrong", null);
         }
 
+        // If loan referencing non-existing books throw 404
         if (! isExistingBook(loan.getBookId().toString()))
         {
             throw new EntityNotFoundException("Book id " + loan.getBookId() + " does not exist.", null);
         }
 
+        // If loan referencing non-existing clients throw 404
         if(! isExistingClient(loan.getClientId().toString()))
         {
             throw new EntityNotFoundException("Client id " + loan.getClientId() + " does not exist.", null);
         }
+
+        // Implicit else: valid loan is saved in the DB
         Loan createdLoan = loanRepository.save(loan);
         return this.loanToLoanResponseConverter.convert(createdLoan);
     }
 
     @Override
     public LoanResponse getLoanById(Long id) {
+        // If loan does not exist throw 404
         Loan loan = loanRepository.findById(id);
         if (loan == null)
         {
@@ -103,17 +110,53 @@ public class LoanServiceImpl implements LoanService {
     }
 
     @Override
-    public LoanResponse modifyAllLoanData(LoanRequest preData, LoanRequest loanData) {
+    public LoanResponse modifyAllLoanData(LoanRequest loanRequest, Long id) {
+        Loan loan = this.loanRequestToLoanConverter.convert(loanRequest);
+
+        // If loan has null values or wrong values throw 400
+        if (
+                ! this.isValidSyntaxLoanForNulls(Objects.requireNonNull(loan))
+                        || ! this.isValidSyntaxLoanForZeroes(loan))
+        {
+            throw new BadParametersException("One or more parameters of the request are wrong", null);
+        }
+
+        // If loan does not exist throw 404
+        Loan loanMatched = loanRepository.findById(id);
+        if (loanMatched == null)
+        {
+            throw new EntityNotFoundException("Loan with id " + id.toString() + " does not exist", null);
+        }
+
+        // If loan referencing non-existing books throw 404
+        if (! isExistingBook(loan.getBookId().toString()))
+        {
+            throw new EntityNotFoundException("Book id " + loan.getBookId() + " does not exist.", null);
+        }
+
+        // If loan referencing non-existing clients throw 404
+        if(! isExistingClient(loan.getClientId().toString()))
+        {
+            throw new EntityNotFoundException("Client id " + loan.getClientId() + " does not exist.", null);
+        }
+
+        // Update values of matched loan with values of received request
+        Loan mergedLoan = this.loanMerger.merge(loanMatched, loan);
+
+        // Save updated loan
+        mergedLoan = this.loanRepository.save(mergedLoan);
+
+        // Return response
+        return this.loanToLoanResponseConverter.convert(mergedLoan);
+    }
+
+    @Override
+    public LoanResponse modifyLoan(LoanRequest loan, Long id) {
         return null;
     }
 
     @Override
-    public LoanResponse modifyLoan(LoanRequest preData, LoanRequest loanData) {
-        return null;
-    }
-
-    @Override
-    public LoanResponse deleteLoan(LoanRequest preData, LoanRequest loanData) {
+    public LoanResponse deleteLoan(Long id) {
         return null;
     }
 
