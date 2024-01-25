@@ -141,7 +141,7 @@ public class LoansController {
         }
     }
 
-    @PutMapping("/loans/{id}")
+    @DeleteMapping("/loans/{id}")
     public ResponseEntity<LoanResponse> deleteLoan(@PathVariable String id)
     {
         try
