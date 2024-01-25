@@ -3,6 +3,8 @@ package net.unir.missi.desarrollowebfullstack.bookabook.operador.controller;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.unir.missi.desarrollowebfullstack.bookabook.operador.exceptions.BadParametersException;
+import net.unir.missi.desarrollowebfullstack.bookabook.operador.exceptions.EntityNotFoundException;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api.LoanRequest;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api.LoanResponse;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.service.LoanServiceImpl;
@@ -13,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * TODO: delete Loan
@@ -48,6 +51,14 @@ public class LoansController {
                 List<LoanResponse> response = service.getAllLoans(bookId, clientId, loanDate, returnDate, dueDate, isReturned, renewalCount);
                 return ResponseEntity.ok(Objects.requireNonNullElse(response, Collections.emptyList()));
             }
+            catch (EntityNotFoundException e)
+            {
+                return ResponseEntity.notFound().build();
+            }
+            catch (BadParametersException e)
+            {
+                return ResponseEntity.badRequest().build();
+            }
             catch(Exception e)
             {
                 return ResponseEntity.internalServerError().build();
@@ -66,6 +77,15 @@ public class LoansController {
             LoanResponse newLoan = service.createLoan(loanRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(newLoan);
         }
+        catch (EntityNotFoundException e)
+        {
+            Logger.getGlobal().warning("Not found" + e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
+        catch (BadParametersException e)
+        {
+            return ResponseEntity.badRequest().build();
+        }
         catch(Exception e)
         {
             return ResponseEntity.internalServerError().build();
@@ -73,12 +93,20 @@ public class LoansController {
     }
 
     @GetMapping("/loans/{id}")
-    public ResponseEntity<LoanResponse> getLoanById(Long id)
+    public ResponseEntity<LoanResponse> getLoanById(@PathVariable String id)
     {
         try
         {
-            LoanResponse response = service.getLoanById(id);
+            LoanResponse response = service.getLoanById(Long.valueOf(id));
             return ResponseEntity.ok(response);
+        }
+        catch (EntityNotFoundException e)
+        {
+            return ResponseEntity.notFound().build();
+        }
+        catch (BadParametersException e)
+        {
+            return ResponseEntity.badRequest().build();
         }
         catch(Exception e)
         {
@@ -87,12 +115,20 @@ public class LoansController {
     }
 
     @GetMapping("/loans/client/{clientId}")
-    public ResponseEntity<List<LoanResponse>> getLoanByClientId(Long clientId)
+    public ResponseEntity<List<LoanResponse>> getLoanByClientId(@PathVariable String clientId)
     {
         try
         {
-            List<LoanResponse> response = service.getLoansByClientId(clientId);
+            List<LoanResponse> response = service.getLoansByClientId(Long.valueOf(clientId));
             return ResponseEntity.ok(Objects.requireNonNullElse(response, Collections.emptyList()));
+        }
+        catch (EntityNotFoundException e)
+        {
+            return ResponseEntity.notFound().build();
+        }
+        catch (BadParametersException e)
+        {
+            return ResponseEntity.badRequest().build();
         }
         catch(Exception e)
         {

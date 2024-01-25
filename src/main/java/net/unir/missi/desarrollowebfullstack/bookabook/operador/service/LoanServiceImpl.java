@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.clients.BuscadorClient;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.config.LoanRequestToLoanConverter;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.config.LoanToLoanResponseConverter;
+import net.unir.missi.desarrollowebfullstack.bookabook.operador.exceptions.BadParametersException;
+import net.unir.missi.desarrollowebfullstack.bookabook.operador.exceptions.EntityNotFoundException;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api.BookResponse;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api.ClientResponse;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api.LoanRequest;
@@ -14,9 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -49,21 +51,16 @@ public class LoanServiceImpl implements LoanService {
     // CRUD
 
     @Override
-    public List<LoanResponse> getAllLoans(Long bookId, Long clientId, Date loanDate, Date returnDate, Date dueDate, Boolean isReturned, Integer renewalCount) throws RuntimeException {
-
+    public List<LoanResponse> getAllLoans(Long bookId, Long clientId, Date loanDate, Date returnDate, Date dueDate, Boolean isReturned, Integer renewalCount) {
+        Loan loan = new Loan(null, bookId, clientId, loanDate, returnDate, dueDate, isReturned, renewalCount);
         List<Loan> loanList;
         try {
-            if (bookId != null
-            || clientId != null
-            || loanDate != null
-            || returnDate != null
-            || dueDate != null
-            || isReturned != null
-            || renewalCount != null)
+            if (this.isValidSyntaxLoanForNulls(loan)) {
                 loanList = loanRepository.search(bookId, clientId, loanDate, returnDate, dueDate, isReturned, renewalCount);
-            else
+            }
+            else {
                 loanList = loanRepository.findAll();
-
+            }
             return loanList.stream().map((Loan l) -> this.loanToLoanResponseConverter.convert(l)).collect(Collectors.toList());
         }
         catch(Exception e) {
@@ -72,79 +69,98 @@ public class LoanServiceImpl implements LoanService {
     }
 
     @Override
-    public LoanResponse createLoan(LoanRequest request) throws RuntimeException {
-            if(request != null
-                    && request.getBookId() != 0
-                    && request.getClientId() != 0
-                    && request.getLoanDate() != null
-                    && request.getDueDate() != null
-                    && request.getReturnDate() != null
-                    && request.getIsReturned() != null
-                    && request.getRenewalCount() != null) {
-
-                    boolean bookExists = isBookValid(request.getBookId().toString());
-
-                    if(!bookExists) {
-                        return null;
-                    }
-                    Loan newLoan = this.loanRequestToLoanConverter.convert(request);
-                    Loan createdLoan = loanRepository.save(newLoan);
-                    return this.loanToLoanResponseConverter.convert(createdLoan);
-                }
-                return null;
-    }
-
-    @Override
-    public LoanResponse getLoanById(Long id) throws RuntimeException {
-        Loan loan = loanRepository.findById(id);
-        if(loan != null) {
-            return this.loanToLoanResponseConverter.convert(loan);
+    public LoanResponse createLoan(LoanRequest request) {
+        Loan loan = this.loanRequestToLoanConverter.convert(request);
+        if (
+                ! this.isValidSyntaxLoanForNulls(Objects.requireNonNull(loan))
+                || ! this.isValidSyntaxLoanForZeroes(loan))
+        {
+            throw new BadParametersException("One or more parameters of the request are wrong", null);
         }
+
+        if (! isExistingBook(loan.getBookId().toString()))
+        {
+            throw new EntityNotFoundException("Book id " + loan.getBookId() + " does not exist.", null);
+        }
+
+        if(! isExistingClient(loan.getClientId().toString()))
+        {
+            throw new EntityNotFoundException("Client id " + loan.getClientId() + " does not exist.", null);
+        }
+        Loan createdLoan = loanRepository.save(loan);
+        return this.loanToLoanResponseConverter.convert(createdLoan);
+    }
+
+    @Override
+    public LoanResponse getLoanById(Long id) {
+        Loan loan = loanRepository.findById(id);
+        if (loan == null)
+        {
+            throw new EntityNotFoundException("Loan with id " + id.toString() + " does not exist", null);
+        }
+
+        return this.loanToLoanResponseConverter.convert(loan);
+    }
+
+    @Override
+    public LoanResponse modifyAllLoanData(LoanRequest preData, LoanRequest loanData) {
         return null;
     }
 
     @Override
-    public List<LoanResponse> getLoansByClientId(Long clientId) throws RuntimeException {
-        List<Loan> loansList = loanRepository.findByClientId(clientId);
-        return loansList.stream().map((Loan l) -> this.loanToLoanResponseConverter.convert(l)).collect(Collectors.toList());
-    }
-
-    @Override
-    public LoanResponse modifyAllLoanData(LoanRequest preData, LoanRequest loanData) throws RuntimeException {
+    public LoanResponse modifyLoan(LoanRequest preData, LoanRequest loanData) {
         return null;
     }
 
     @Override
-    public LoanResponse modifyLoan(LoanRequest preData, LoanRequest loanData) throws RuntimeException {
-        return null;
-    }
-
-    @Override
-    public LoanResponse deleteLoan(LoanRequest preData, LoanRequest loanData) throws RuntimeException {
+    public LoanResponse deleteLoan(LoanRequest preData, LoanRequest loanData) {
         return null;
     }
 
     // SPECIALIZATION
 
-    private boolean isBookValid(String id) {
+    @Override
+    public List<LoanResponse> getLoansByClientId(Long clientId) {
+        List<Loan> loansList = loanRepository.findByClientId(clientId);
+        return loansList.stream().map((Loan l) -> this.loanToLoanResponseConverter.convert(l)).collect(Collectors.toList());
+    }
+
+    // PRIVATE METHODS
+
+    private boolean isExistingBook(String id) {
         try {
             ResponseEntity<BookResponse> book = buscadorClient.getBook(id);
-            return true;
+            return book != null;
         }
         catch(Exception e) {
-            Logger.getGlobal().warning(e.getStackTrace().toString());
             return false;
         }
     }
 
-    private boolean isClientValid(String id) {
+    private boolean isExistingClient(String id) {
         try {
             ResponseEntity<ClientResponse> client = buscadorClient.getClient(id);
-            return true;
+            return client != null;
         }
         catch(Exception e) {
-            Logger.getGlobal().warning(e.getStackTrace().toString());
             return false;
         }
+    }
+
+    private boolean isValidSyntaxLoanForNulls(Loan loan)
+    {
+        return loan.getBookId() != null
+                && loan.getClientId() != null
+                && loan.getLoanDate() != null
+                && loan.getReturnDate() != null
+                && loan.getDueDate() != null
+                && loan.getIsReturned() != null
+                && loan.getRenewalCount() != null;
+    }
+
+    private boolean isValidSyntaxLoanForZeroes(Loan loan)
+    {
+        return loan.getBookId() != 0
+                && loan.getClientId() != 0;
     }
 }
