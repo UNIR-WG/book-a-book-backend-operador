@@ -9,7 +9,6 @@ import lombok.*;
 @Builder
 @ToString
 public class ClientResponse {
-
     private Long id;
     private String firstName;
     private String lastName;

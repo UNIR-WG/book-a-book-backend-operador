@@ -21,5 +21,4 @@ public class AuthorResponse {
     private String webSite;
     private String biography;
     private List<Long> booksWrittenId;
-
 }

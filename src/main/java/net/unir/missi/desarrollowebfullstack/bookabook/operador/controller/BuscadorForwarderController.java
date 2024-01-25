@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Delega todas las llamadas del buscador hacia el buscador. Se usa solo en el modo de desarrollador
@@ -108,6 +109,8 @@ public class BuscadorForwarderController {
             @RequestParam(required = false) String address,
             @RequestParam(required = false) String phoneNumber,
             @RequestParam(required = false) String email) {
+
+
         return buscadorClient.getFilterClients(firstName, lastName, address, phoneNumber, email);
     }
 
