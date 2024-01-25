@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+/**
+ * TODO: delete Loan
+ * TODO: patch loan
+ */
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -37,54 +41,61 @@ public class LoansController {
             @RequestParam(required = false)Boolean isReturned,
             @Parameter(name="renewalCount", example = "")
             @RequestParam(required = false)Integer renewalCount
-            ) {
-
-            try {
+            )
+    {
+            try
+            {
                 List<LoanResponse> response = service.getAllLoans(bookId, clientId, loanDate, returnDate, dueDate, isReturned, renewalCount);
                 return ResponseEntity.ok(Objects.requireNonNullElse(response, Collections.emptyList()));
             }
-            catch(Exception e) {
+            catch(Exception e)
+            {
                 return ResponseEntity.internalServerError().build();
             }
     }
 
     @PostMapping("/loans")
-    public ResponseEntity<LoanResponse> addLoan(@RequestBody LoanRequest loanRequest) {
-        try {
-            if(loanRequest != null) {
-                if(!service.validateLoan(loanRequest)) {
-                    return ResponseEntity.notFound().build();
-                }
-                LoanResponse newLoan = service.createLoan(loanRequest);
-                return ResponseEntity.status(HttpStatus.CREATED).body(newLoan);
-            }
-            else
+    public ResponseEntity<LoanResponse> addLoan(@RequestBody LoanRequest loanRequest)
+    {
+        try
+        {
+            if (loanRequest == null)
             {
                 return ResponseEntity.badRequest().build();
             }
-        } catch(Exception e) {
+            LoanResponse newLoan = service.createLoan(loanRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newLoan);
+        }
+        catch(Exception e)
+        {
             return ResponseEntity.internalServerError().build();
         }
     }
 
     @GetMapping("/loans/{id}")
-    public ResponseEntity<LoanResponse> getLoanById(Long id) {
-        try {
+    public ResponseEntity<LoanResponse> getLoanById(Long id)
+    {
+        try
+        {
             LoanResponse response = service.getLoanById(id);
             return ResponseEntity.ok(response);
         }
-        catch(Exception e) {
+        catch(Exception e)
+        {
             return ResponseEntity.internalServerError().build();
         }
     }
 
     @GetMapping("/loans/client/{clientId}")
-    public ResponseEntity<List<LoanResponse>> getLoanByClientId(Long clientId) {
-        try {
+    public ResponseEntity<List<LoanResponse>> getLoanByClientId(Long clientId)
+    {
+        try
+        {
             List<LoanResponse> response = service.getLoansByClientId(clientId);
             return ResponseEntity.ok(Objects.requireNonNullElse(response, Collections.emptyList()));
         }
-        catch(Exception e) {
+        catch(Exception e)
+        {
             return ResponseEntity.internalServerError().build();
         }
     }
