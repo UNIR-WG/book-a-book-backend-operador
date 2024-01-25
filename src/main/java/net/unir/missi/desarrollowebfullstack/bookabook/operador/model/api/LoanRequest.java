@@ -1,4 +1,5 @@
 package net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api;
+
 import lombok.*;
 
 import java.util.Date;
