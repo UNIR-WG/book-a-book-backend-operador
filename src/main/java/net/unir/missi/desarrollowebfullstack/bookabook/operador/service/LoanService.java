@@ -14,7 +14,7 @@ public interface LoanService {
     LoanResponse getLoanById(Long id);
     LoanResponse modifyAllLoanData(LoanRequest loan, Long id);
     LoanResponse modifyLoan(LoanRequest loan, Long id);
-    LoanResponse deleteLoan(Long id);
+    LoanResponse deleteLoan(String id);
 
     // SPECIALIZATIONS
     List<LoanResponse> getLoansByClientId(Long clientId);

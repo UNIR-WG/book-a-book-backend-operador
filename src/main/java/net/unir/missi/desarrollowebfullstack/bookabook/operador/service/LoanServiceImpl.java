@@ -3,6 +3,7 @@ package net.unir.missi.desarrollowebfullstack.bookabook.operador.service;
 import lombok.extern.slf4j.Slf4j;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.clients.BuscadorClient;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.config.LoanMerger;
+import net.unir.missi.desarrollowebfullstack.bookabook.operador.config.LoanMergerNonEmpty;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.config.LoanRequestToLoanConverter;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.config.LoanToLoanResponseConverter;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.exceptions.BadParametersException;
@@ -51,6 +52,9 @@ public class LoanServiceImpl implements LoanService {
 
     @Autowired
     private LoanMerger loanMerger;
+
+    @Autowired
+    private LoanMergerNonEmpty loanMergerNonEmpty;
 
     // CRUD
 
@@ -151,14 +155,63 @@ public class LoanServiceImpl implements LoanService {
     }
 
     @Override
-    public LoanResponse modifyLoan(LoanRequest loan, Long id) {
-        return null;
+    public LoanResponse modifyLoan(LoanRequest loanRequest, Long id) {
+        Loan loan = this.loanRequestToLoanConverter.convert(loanRequest);
+
+        // If loan has null values or wrong values throw 400
+        if (
+                ! this.isValidSyntaxLoanForNulls(Objects.requireNonNull(loan))
+                        || ! this.isValidSyntaxLoanForZeroes(loan))
+        {
+            throw new BadParametersException("One or more parameters of the request are wrong", null);
+        }
+
+        // If loan does not exist throw 404
+        Loan loanMatched = loanRepository.findById(id);
+        if (loanMatched == null)
+        {
+            throw new EntityNotFoundException("Loan with id " + id.toString() + " does not exist", null);
+        }
+
+        // If loan referencing non-existing books throw 404
+        if (! isExistingBook(loan.getBookId().toString()))
+        {
+            throw new EntityNotFoundException("Book id " + loan.getBookId() + " does not exist.", null);
+        }
+
+        // If loan referencing non-existing clients throw 404
+        if(! isExistingClient(loan.getClientId().toString()))
+        {
+            throw new EntityNotFoundException("Client id " + loan.getClientId() + " does not exist.", null);
+        }
+
+        // Update values of matched loan with values of received request
+        Loan mergedLoan = this.loanMergerNonEmpty.merge(loanMatched, loan);
+
+        // Save updated loan
+        mergedLoan = this.loanRepository.save(mergedLoan);
+
+        // Return response
+        return this.loanToLoanResponseConverter.convert(mergedLoan);
     }
 
     @Override
-    public LoanResponse deleteLoan(Long id) {
-        return null;
+    public LoanResponse deleteLoan(String id) {
+        // If loan does not exist throw 404
+        Loan loanMatched = loanRepository.findById(Long.valueOf(id));
+        if (loanMatched == null)
+        {
+            throw new EntityNotFoundException("Loan with id " + id.toString() + " does not exist", null);
+        }
+
+        // Create search instance
+        Loan l = new Loan();
+        l.setId(Long.valueOf(id));
+
+        Loan loan = this.loanRepository.delete(l);
+        return this.loanToLoanResponseConverter.convert(loan);
     }
+
 
     // SPECIALIZATION
 

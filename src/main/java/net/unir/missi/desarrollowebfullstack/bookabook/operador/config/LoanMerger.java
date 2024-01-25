@@ -8,13 +8,13 @@ import org.springframework.stereotype.Component;
 public class LoanMerger {
     public Loan merge(Loan destiny, Loan source)
     {
-        source.setBookId(destiny.getBookId());
-        source.setClientId(destiny.getClientId());
-        source.setDueDate(destiny.getDueDate());
-        source.setLoanDate(destiny.getLoanDate());
-        source.setIsReturned(destiny.getIsReturned());
-        source.setRenewalCount(destiny.getRenewalCount());
-        source.setReturnDate(destiny.getReturnDate());
-        return source;
+        destiny.setBookId(source.getBookId());
+        destiny.setClientId(source.getClientId());
+        destiny.setDueDate(source.getDueDate());
+        destiny.setLoanDate(source.getLoanDate());
+        destiny.setIsReturned(source.getIsReturned());
+        destiny.setRenewalCount(source.getRenewalCount());
+        destiny.setReturnDate(source.getReturnDate());
+        return destiny;
     }
 }

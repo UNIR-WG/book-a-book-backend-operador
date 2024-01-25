@@ -50,7 +50,7 @@ public class LoansController {
     {
             try
             {
-                List<LoanResponse> response = service.getAllLoans(bookId, clientId, loanDate, returnDate, dueDate, isReturned, renewalCount);
+                List<LoanResponse> response = this.service.getAllLoans(bookId, clientId, loanDate, returnDate, dueDate, isReturned, renewalCount);
                 return ResponseEntity.ok(Objects.requireNonNullElse(response, Collections.emptyList()));
             }
             catch (EntityNotFoundException e)
@@ -61,7 +61,7 @@ public class LoansController {
             {
                 return ResponseEntity.badRequest().build();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return ResponseEntity.internalServerError().build();
             }
@@ -72,7 +72,7 @@ public class LoansController {
     {
         try
         {
-            LoanResponse response = service.getLoanById(Long.valueOf(id));
+            LoanResponse response = this.service.getLoanById(Long.valueOf(id));
             return ResponseEntity.ok(response);
         }
         catch (EntityNotFoundException e)
@@ -83,7 +83,7 @@ public class LoansController {
         {
             return ResponseEntity.badRequest().build();
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             return ResponseEntity.internalServerError().build();
         }
@@ -98,19 +98,18 @@ public class LoansController {
             {
                 return ResponseEntity.badRequest().build();
             }
-            LoanResponse newLoan = service.createLoan(loanRequest);
+            LoanResponse newLoan = this.service.createLoan(loanRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(newLoan);
         }
         catch (EntityNotFoundException e)
         {
-            Logger.getGlobal().warning("Not found" + e.getMessage());
             return ResponseEntity.notFound().build();
         }
         catch (BadParametersException e)
         {
             return ResponseEntity.badRequest().build();
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             return ResponseEntity.internalServerError().build();
         }
@@ -125,19 +124,61 @@ public class LoansController {
             {
                 return ResponseEntity.badRequest().build();
             }
-            LoanResponse newLoan = service.modifyAllLoanData(loanRequest, Long.valueOf(id));
+            LoanResponse newLoan = this.service.modifyAllLoanData(loanRequest, Long.valueOf(id));
             return ResponseEntity.status(HttpStatus.CREATED).body(newLoan);
         }
         catch (EntityNotFoundException e)
         {
-            Logger.getGlobal().warning("Not found" + e.getMessage());
             return ResponseEntity.notFound().build();
         }
         catch (BadParametersException e)
         {
             return ResponseEntity.badRequest().build();
         }
-        catch(Exception e)
+        catch (Exception e)
+        {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PutMapping("/loans/{id}")
+    public ResponseEntity<LoanResponse> deleteLoan(@PathVariable String id)
+    {
+        try
+        {
+            return ResponseEntity.ok(this.service.deleteLoan(id));
+        }
+        catch (EntityNotFoundException e)
+        {
+            return ResponseEntity.notFound().build();
+        }
+        catch (Exception e)
+        {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PatchMapping("/loans/{id}")
+    public ResponseEntity<LoanResponse> patchLoan(@RequestBody LoanRequest loanRequest, @PathVariable String id)
+    {
+        try
+        {
+            if (loanRequest == null)
+            {
+                return ResponseEntity.badRequest().build();
+            }
+            LoanResponse newLoan = this.service.modifyLoan(loanRequest, Long.valueOf(id));
+            return ResponseEntity.status(HttpStatus.CREATED).body(newLoan);
+        }
+        catch (EntityNotFoundException e)
+        {
+            return ResponseEntity.notFound().build();
+        }
+        catch (BadParametersException e)
+        {
+            return ResponseEntity.badRequest().build();
+        }
+        catch (Exception e)
         {
             return ResponseEntity.internalServerError().build();
         }
