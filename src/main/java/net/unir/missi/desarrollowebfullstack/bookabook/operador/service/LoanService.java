@@ -82,14 +82,18 @@ public class LoanService implements ILoanService {
             throw new EntityNotFoundException("Book id " + loan.getBookId() + " does not exist.", null);
         }
 
+        Logger.getGlobal().warning("hasta aki existe book");
         // If loan referencing non-existing clients throw 404
         if(! isExistingClient(loan.getClientId().toString()))
         {
             throw new EntityNotFoundException("Client id " + loan.getClientId() + " does not exist.", null);
         }
 
+        Logger.getGlobal().warning("hasta aki existe client");
+
         // Implicit else: valid loan is saved in the DB
         Loan createdLoan = loanRepository.save(loan);
+        Logger.getGlobal().warning("hasta aki ya se ha guardao");
         return this.loanToLoanResponseConverter.convert(createdLoan);
     }
 

@@ -15,7 +15,7 @@ import java.util.Map;
  * todo añadir loans
  */
 @RestController
-@Profile("dev")
+@Profile("prod")
 public class BuscadorForwarderController {
 
     private final BuscadorClient buscadorClient;
