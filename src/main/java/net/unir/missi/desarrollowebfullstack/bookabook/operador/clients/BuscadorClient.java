@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-@FeignClient(name = "BUSCADOR", configuration = FeignConfig.class, url = "http://localhost:8081")
+@FeignClient(name = "BUSCADOR", configuration = FeignConfig.class)
 public interface BuscadorClient {
 
 
