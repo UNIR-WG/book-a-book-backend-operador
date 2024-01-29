@@ -75,6 +75,7 @@ public class LoanService implements ILoanService {
             throw new BadParametersException("One or more parameters of the request are wrong", null);
         }
 
+        Logger.getGlobal().warning("hasta aki");
         // If loan referencing non-existing books throw 404
         if (! isExistingBook(loan.getBookId().toString()))
         {
@@ -217,7 +218,7 @@ public class LoanService implements ILoanService {
     private boolean isExistingBook(String id) {
         try {
             ResponseEntity<BookResponse> book = buscadorClient.getBook(id);
-            Logger.global.info("MyText");
+            Logger.getGlobal().warning("MyText");
             return book != null;
         }
         catch(Exception e) {
@@ -228,7 +229,7 @@ public class LoanService implements ILoanService {
     private boolean isExistingClient(String id) {
         try {
             ResponseEntity<ClientResponse> client = buscadorClient.getClient(id);
-            Logger.global.info("MyText");
+            Logger.getGlobal().warning("MyText");
             return client != null;
         }
         catch(Exception e) {
