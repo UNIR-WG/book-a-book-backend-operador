@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Slf4j
@@ -26,7 +27,12 @@ public class LoanRepository {
     public Loan findById(Long id) { return loanJpaRepository.findById(id).orElse(null); }
     public List<Loan> findByClientId(Long clientId){ return loanJpaRepository.findByClientId(clientId); }
     public Loan save(Loan loan){ return loanJpaRepository.save(loan); }
-    public void delete(Loan loan) { loanJpaRepository.delete(loan); }
+    public Loan delete(Loan loan)
+    {
+        Optional<Loan> l = this.loanJpaRepository.findById(loan.getId());
+        loanJpaRepository.delete(loan);
+        return l.get();
+    }
 
     public List<Loan> search(Long bookId, Long clientId, Date loanDate, Date returnDate, Date dueDate, Boolean isReturned, Integer renewalCount) {
         SearchCriteria<Loan> spec = new SearchCriteria<>();

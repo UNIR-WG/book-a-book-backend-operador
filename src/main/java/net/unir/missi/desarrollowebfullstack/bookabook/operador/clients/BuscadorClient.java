@@ -1,5 +1,6 @@
 package net.unir.missi.desarrollowebfullstack.bookabook.operador.clients;
 
+import net.unir.missi.desarrollowebfullstack.bookabook.operador.config.FeignConfig;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -9,8 +10,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-@FeignClient(name = "buscador")
+@FeignClient(name = "buscador", url = "http://localhost:8082/",configuration = FeignConfig.class)
 public interface BuscadorClient {
+
 
     // Authors
 
