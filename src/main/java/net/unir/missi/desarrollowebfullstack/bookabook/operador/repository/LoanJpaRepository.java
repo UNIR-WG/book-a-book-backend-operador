@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface LoanJpaRepository extends JpaRepository<Loan, Long>, JpaSpecificationExecutor<Loan> {
     List<Loan> findByClientId(Long clientId);
+    List<Loan> findByBookIdAndIsReturned(Long bookId, boolean isRturned);
+
 }

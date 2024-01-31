@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.exceptions.BadParametersException;
+import net.unir.missi.desarrollowebfullstack.bookabook.operador.exceptions.EntityInvalidOperationException;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.exceptions.EntityNotFoundException;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api.LoanRequest;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api.LoanResponse;
@@ -14,7 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.*;
+import java.util.logging.Logger;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,11 +33,11 @@ public class LoansController {
             @Parameter(name="clientId", example = "")
             @RequestParam(required = false) Long clientId,
             @Parameter(name="loanDate", example = "")
-            @RequestParam(required = false)Date loanDate,
+            @RequestParam(required = false) LocalDate loanDate,
             @Parameter(name="returnDate", example = "")
-            @RequestParam(required = false)Date returnDate,
+            @RequestParam(required = false)LocalDate returnDate,
             @Parameter(name="dueDate", example = "")
-            @RequestParam(required = false)Date dueDate,
+            @RequestParam(required = false)LocalDate dueDate,
             @Parameter(name="isReturned", example = "")
             @RequestParam(required = false)Boolean isReturned,
             @Parameter(name="renewalCount", example = "")
@@ -98,10 +101,15 @@ public class LoansController {
         }
         catch (BadParametersException e)
         {
+            Logger.getGlobal().warning("Bad Parameters");
+            return ResponseEntity.badRequest().build();
+        }
+        catch(EntityInvalidOperationException e) {
             return ResponseEntity.badRequest().build();
         }
         catch (Exception e)
         {
+            Logger.getGlobal().warning("Error: " +  e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -147,7 +155,7 @@ public class LoansController {
         }
     }
 
-    @GetMapping("/loans/client/{clientId}")
+    @GetMapping("/clients/{clientId}/loans")
     public ResponseEntity<List<LoanResponse>> getLoanByClientId(@PathVariable String clientId) {
         try
         {
