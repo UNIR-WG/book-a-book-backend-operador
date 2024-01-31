@@ -12,8 +12,6 @@ public class LoanRequestToLoanConverter implements Converter<LoanRequest, Loan> 
         return Loan.builder()
                 .bookId(source.getBookId())
                 .clientId(source.getClientId())
-                .loanDate(source.getLoanDate())
-                .dueDate(source.getDueDate())
                 .returnDate(source.getReturnDate())
                 .isReturned(source.getIsReturned())
                 .renewalCount(source.getRenewalCount())
