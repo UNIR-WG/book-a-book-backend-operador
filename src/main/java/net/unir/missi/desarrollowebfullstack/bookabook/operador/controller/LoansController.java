@@ -1,6 +1,10 @@
 package net.unir.missi.desarrollowebfullstack.bookabook.operador.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.exceptions.BadParametersException;
@@ -8,6 +12,7 @@ import net.unir.missi.desarrollowebfullstack.bookabook.operador.exceptions.Entit
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.exceptions.EntityNotFoundException;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api.LoanRequest;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api.LoanResponse;
+import net.unir.missi.desarrollowebfullstack.bookabook.operador.model.sql.Loan;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.service.LoanService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,20 +32,27 @@ public class LoansController {
     private final LoanService service;
 
     @GetMapping("/loans")
+    @Operation(
+            operationId = "Obtener préstamos",
+            description = "Operacion de lectura",
+            summary = "Se devuelve una lista de todos los préstamos almacenados en la base de datos.")
+    @ApiResponse(
+            responseCode = "200",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Loan.class)))
     public ResponseEntity<List<LoanResponse>> getLoans(
-            @Parameter(name="bookId", example = "")
+            @Parameter(name="bookId", description = "Id del Libro préstado")
             @RequestParam(required = false) Long bookId,
-            @Parameter(name="clientId", example = "")
+            @Parameter(name="clientId", description = "Id del Cliente al que se le realizó el préstamo")
             @RequestParam(required = false) Long clientId,
-            @Parameter(name="loanDate", example = "")
+            @Parameter(name="loanDate", description = "Fecha de registro del préstamo")
             @RequestParam(required = false) LocalDate loanDate,
-            @Parameter(name="returnDate", example = "")
+            @Parameter(name="returnDate", description = "Fecha en que el libro fue devuelto")
             @RequestParam(required = false)LocalDate returnDate,
-            @Parameter(name="dueDate", example = "")
+            @Parameter(name="dueDate", description = "Fecha de vencimiento del préstamo")
             @RequestParam(required = false)LocalDate dueDate,
-            @Parameter(name="isReturned", example = "")
+            @Parameter(name="isReturned", description = "Indica si el libro ha sido devuelto")
             @RequestParam(required = false)Boolean isReturned,
-            @Parameter(name="renewalCount", example = "")
+            @Parameter(name="renewalCount", description = "Cantidad de renovaciones del préstamo")
             @RequestParam(required = false)Integer renewalCount
             ) {
 
@@ -64,6 +76,17 @@ public class LoansController {
     }
 
     @GetMapping("/loans/{id}")
+    @Operation(
+            operationId = "Obtener un préstamo",
+            description = "Operacion de lectura",
+            summary = "Se devuelve un préstamo a partir de su identificador.")
+    @ApiResponse(
+            responseCode = "200",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Loan.class)))
+    @ApiResponse(
+            responseCode = "404",
+            content = @Content(mediaType = "application/json", schema = @Schema()),
+            description = "No se ha encontrado el préstamo con el identificador indicado.")
     public ResponseEntity<LoanResponse> getLoan(@PathVariable String id) {
         try
         {
@@ -85,6 +108,25 @@ public class LoansController {
     }
 
     @PostMapping("/loans")
+    @Operation(
+            operationId = "Crear un préstamo",
+            description = "Operacion de escritura",
+            summary = "Se crea un préstamo a partir de sus datos.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Datos del préstamo a crear.",
+                    required = true,
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = LoanRequest.class))))
+    @ApiResponse(
+            responseCode = "201",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = LoanResponse.class)))
+    @ApiResponse(
+            responseCode = "400",
+            content = @Content(mediaType = "application/json", schema = @Schema()),
+            description = "Datos incorrectos introducidos.")
+    @ApiResponse(
+            responseCode = "404",
+            content = @Content(mediaType = "application/json", schema = @Schema()),
+            description = "Id del Libro O Id del Cliente no existen.")
     public ResponseEntity<LoanResponse> addLoan(@RequestBody LoanRequest loanRequest) {
         try
         {
@@ -101,7 +143,6 @@ public class LoansController {
         }
         catch (BadParametersException e)
         {
-            Logger.getGlobal().warning("Bad Parameters");
             return ResponseEntity.badRequest().build();
         }
         catch(EntityInvalidOperationException e) {
@@ -115,6 +156,17 @@ public class LoansController {
     }
 
     @DeleteMapping("/loans/{id}")
+    @Operation(
+            operationId = "Eliminar un préstamo",
+            description = "Operacion de escritura",
+            summary = "Se elimina un préstamo a partir de su identificador.")
+    @ApiResponse(
+            responseCode = "200",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = LoanResponse.class)))
+    @ApiResponse(
+            responseCode = "404",
+            content = @Content(mediaType = "application/json", schema = @Schema()),
+            description = "No se ha encontrado el préstamo con el identificador indicado.")
     public ResponseEntity<LoanResponse> deleteLoan(@PathVariable String id) {
         try
         {
@@ -131,6 +183,21 @@ public class LoansController {
     }
 
     @PatchMapping("/loans/{id}")
+    @Operation(
+            operationId = "Modificar parcialmente un préstamo",
+            description = "RFC 7386. Operacion de escritura",
+            summary = "RFC 7386. Se modifica parcialmente un préstamo.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Datos del préstamo a modificar.",
+                    required = true,
+                    content = @Content(mediaType = "application/merge-patch+json", schema = @Schema(implementation = LoanRequest.class))))
+    @ApiResponse(
+            responseCode = "200",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = LoanResponse.class)))
+    @ApiResponse(
+            responseCode = "400",
+            content = @Content(mediaType = "application/json", schema = @Schema()),
+            description = "Datos incorrectos introducidos.")
     public ResponseEntity<LoanResponse> patchLoan(@RequestBody LoanRequest loanRequest, @PathVariable String id) {
         try
         {
@@ -157,6 +224,17 @@ public class LoansController {
     }
 
     @GetMapping("/clients/{clientId}/loans")
+    @Operation(
+            operationId = "Obtener los préstamos de un cliente.",
+            description = "Operacion de lectura",
+            summary = "Se devuelve una lista de préstamos relacionados a un cliente.")
+    @ApiResponse(
+            responseCode = "200",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = LoanResponse.class)))
+    @ApiResponse(
+            responseCode = "404",
+            content = @Content(mediaType = "application/json", schema = @Schema()),
+            description = "No se han encontrado préstamos con el identificador de clienteindicado.")
     public ResponseEntity<List<LoanResponse>> getLoanByClientId(@PathVariable String clientId) {
         try
         {
