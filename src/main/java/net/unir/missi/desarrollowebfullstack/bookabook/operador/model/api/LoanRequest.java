@@ -14,6 +14,6 @@ public class LoanRequest {
     private Long bookId;
     private Long clientId;
     private LocalDate returnDate = null;
-    private Boolean isReturned;
-    private Integer renewalCount;
+    private Boolean isReturned = false;
+    private Integer renewalCount = 0;
 }
