@@ -13,7 +13,7 @@ public interface ILoanService {
     LoanResponse createLoan(LoanRequest request);
     LoanResponse getLoanById(Long id);
     LoanResponse modifyAllLoanData(LoanRequest loan, Long id);
-    LoanResponse modifyLoan(LoanRequest loan, Long id);
+    LoanResponse modifyLoan(boolean isReturned, Long id);
     LoanResponse deleteLoan(String id);
 
     // SPECIALIZATIONS

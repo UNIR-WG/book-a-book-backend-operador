@@ -158,18 +158,12 @@ public class LoanService implements ILoanService {
     }
 
     @Override
-    public LoanResponse modifyLoan(LoanRequest loanRequest, Long id) {
-        Loan loan = this.loanRequestToLoanConverter.convert(loanRequest);
-
+    public LoanResponse modifyLoan(boolean isReturned, Long id) {
         // If loan has null values or wrong values throw 400
-        if (!this.isValidSyntaxLoanForNulls(Objects.requireNonNull(loan))
-                        || ! this.isValidSyntaxLoanForZeroes(loan))
-        {
-            throw new BadParametersException("One or more parameters of the request are wrong", null);
-        }
+
         // If loan does not exist throw 404
-        Loan loanMatched = loanRepository.findById(id);
-        if (loanMatched == null)
+        Loan loan = loanRepository.findById(id);
+        if (loan == null)
         {
             throw new EntityNotFoundException("Loan with id " + id.toString() + " does not exist", null);
         }
@@ -186,23 +180,20 @@ public class LoanService implements ILoanService {
             throw new EntityNotFoundException("Client id " + loan.getClientId() + " does not exist.", null);
         }
 
-        if(loan.getIsReturned()) {
+        if(isReturned) {
             loan.setReturnDate(LocalDate.now());
+            loan.setIsReturned(true);
         }
-        else
-        {
+        else if(!loan.getIsReturned()) {
             loan.setDueDate(LocalDate.now().plusDays(7));
             loan.setRenewalCount(loan.getRenewalCount() + 1);
         }
 
-        // Update values of matched loan with values of received request
-        Loan mergedLoan = this.loanMergerNonEmpty.merge(loanMatched, loan);
-
         // Save updated loan
-        mergedLoan = this.loanRepository.save(mergedLoan);
+        this.loanRepository.save(loan);
 
         // Return response
-        return this.loanToLoanResponseConverter.convert(mergedLoan);
+        return this.loanToLoanResponseConverter.convert(loan);
     }
 
     @Override
