@@ -266,11 +266,7 @@ public class LoanService implements ILoanService {
 
     private boolean isValidSyntaxLoanForNulls(Loan loan)
     {
-        return loan.getBookId() != null
-                && loan.getClientId() != null
-                //&& loan.getReturnDate() != null
-                && loan.getIsReturned() != null
-                && loan.getRenewalCount() != null;
+        return loan.getBookId() != null && loan.getClientId() != null;
     }
 
     private boolean isValidSyntaxLoanForZeroes(Loan loan)
