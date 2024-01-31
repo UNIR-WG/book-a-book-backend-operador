@@ -134,11 +134,12 @@ public class LoansController {
     public ResponseEntity<LoanResponse> patchLoan(@RequestBody LoanRequest loanRequest, @PathVariable String id) {
         try
         {
+            Logger.getGlobal().warning("Entra al controller" + loanRequest);
             if (loanRequest == null)
             {
                 return ResponseEntity.badRequest().build();
             }
-            LoanResponse newLoan = this.service.modifyLoan(loanRequest, Long.valueOf(id));
+            LoanResponse newLoan = this.service.modifyLoan(loanRequest.getIsReturned(), Long.valueOf(id));
             return ResponseEntity.status(HttpStatus.CREATED).body(newLoan);
         }
         catch (EntityNotFoundException e)
