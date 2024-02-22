@@ -9,6 +9,7 @@ import net.unir.missi.desarrollowebfullstack.bookabook.operador.search.SearchSta
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +27,7 @@ public class LoanRepository {
     public List<Loan> findAll() { return loanJpaRepository.findAll(); }
     public Loan findById(Long id) { return loanJpaRepository.findById(id).orElse(null); }
     public List<Loan> findByClientId(Long clientId){ return loanJpaRepository.findByClientId(clientId); }
+    public List<Loan> findByBookIdAndIsReturned(Long bookId, boolean isRturned){ return loanJpaRepository.findByBookIdAndIsReturned(bookId, isRturned); }
     public Loan save(Loan loan){ return loanJpaRepository.save(loan); }
     public Loan delete(Loan loan)
     {
@@ -34,7 +36,7 @@ public class LoanRepository {
         return l.get();
     }
 
-    public List<Loan> search(Long bookId, Long clientId, Date loanDate, Date returnDate, Date dueDate, Boolean isReturned, Integer renewalCount) {
+    public List<Loan> search(Long bookId, Long clientId, LocalDate loanDate, LocalDate returnDate, LocalDate dueDate, Boolean isReturned, Integer renewalCount) {
         SearchCriteria<Loan> spec = new SearchCriteria<>();
 
         if(bookId != null) {

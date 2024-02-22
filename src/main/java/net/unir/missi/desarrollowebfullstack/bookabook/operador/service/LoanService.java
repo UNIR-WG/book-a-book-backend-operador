@@ -7,6 +7,7 @@ import net.unir.missi.desarrollowebfullstack.bookabook.operador.config.LoanMerge
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.config.LoanRequestToLoanConverter;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.config.LoanToLoanResponseConverter;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.exceptions.BadParametersException;
+import net.unir.missi.desarrollowebfullstack.bookabook.operador.exceptions.EntityInvalidOperationException;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.exceptions.EntityNotFoundException;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api.BookResponse;
 import net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api.ClientResponse;
@@ -19,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.awt.print.Book;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -51,7 +53,7 @@ public class LoanService implements ILoanService {
     // CRUD
 
     @Override
-    public List<LoanResponse> getAllLoans(Long bookId, Long clientId, Date loanDate, Date returnDate, Date dueDate, Boolean isReturned, Integer renewalCount) {
+    public List<LoanResponse> getAllLoans(Long bookId, Long clientId, LocalDate loanDate, LocalDate returnDate, LocalDate dueDate, Boolean isReturned, Integer renewalCount) {
         Loan loan = new Loan(null, bookId, clientId, loanDate, returnDate, dueDate, isReturned, renewalCount);
         List<Loan> loanList;
         if (this.isValidSyntaxLoanForNulls(loan)) {
@@ -75,25 +77,30 @@ public class LoanService implements ILoanService {
             throw new BadParametersException("One or more parameters of the request are wrong", null);
         }
 
-        Logger.getGlobal().warning("hasta aki");
         // If loan referencing non-existing books throw 404
         if (! isExistingBook(loan.getBookId().toString()))
         {
             throw new EntityNotFoundException("Book id " + loan.getBookId() + " does not exist.", null);
         }
-
-        Logger.getGlobal().warning("hasta aki existe book");
         // If loan referencing non-existing clients throw 404
         if(! isExistingClient(loan.getClientId().toString()))
         {
             throw new EntityNotFoundException("Client id " + loan.getClientId() + " does not exist.", null);
         }
 
-        Logger.getGlobal().warning("hasta aki existe client");
+        List<Loan> foundLoanedBook = loanRepository.findByBookIdAndIsReturned(request.getBookId(), false);
+        Logger.getGlobal().warning("Book Count: " + foundLoanedBook.stream().count());
+
+        if((long) foundLoanedBook.size() != 0) {
+            Logger.getGlobal().warning("Error: Book " + request.getBookId() + " cannot be loaned because it's already loaned to other client");
+            throw new EntityInvalidOperationException("Error: Book " + request.getBookId() + " cannot be loaned because it's already loaned to other client", null);
+        }
+
+        loan.setLoanDate(LocalDate.now());
+        loan.setDueDate(loan.getLoanDate().plusDays(7));
 
         // Implicit else: valid loan is saved in the DB
         Loan createdLoan = loanRepository.save(loan);
-        Logger.getGlobal().warning("hasta aki ya se ha guardao");
         return this.loanToLoanResponseConverter.convert(createdLoan);
     }
 
@@ -151,20 +158,12 @@ public class LoanService implements ILoanService {
     }
 
     @Override
-    public LoanResponse modifyLoan(LoanRequest loanRequest, Long id) {
-        Loan loan = this.loanRequestToLoanConverter.convert(loanRequest);
-
+    public LoanResponse modifyLoan(boolean isReturned, Long id) {
         // If loan has null values or wrong values throw 400
-        if (
-                ! this.isValidSyntaxLoanForNulls(Objects.requireNonNull(loan))
-                        || ! this.isValidSyntaxLoanForZeroes(loan))
-        {
-            throw new BadParametersException("One or more parameters of the request are wrong", null);
-        }
 
         // If loan does not exist throw 404
-        Loan loanMatched = loanRepository.findById(id);
-        if (loanMatched == null)
+        Loan loan = loanRepository.findById(id);
+        if (loan == null)
         {
             throw new EntityNotFoundException("Loan with id " + id.toString() + " does not exist", null);
         }
@@ -181,14 +180,20 @@ public class LoanService implements ILoanService {
             throw new EntityNotFoundException("Client id " + loan.getClientId() + " does not exist.", null);
         }
 
-        // Update values of matched loan with values of received request
-        Loan mergedLoan = this.loanMergerNonEmpty.merge(loanMatched, loan);
+        if(isReturned) {
+            loan.setReturnDate(LocalDate.now());
+            loan.setIsReturned(true);
+        }
+        else if(!loan.getIsReturned()) {
+            loan.setDueDate(LocalDate.now().plusDays(7));
+            loan.setRenewalCount(loan.getRenewalCount() + 1);
+        }
 
         // Save updated loan
-        mergedLoan = this.loanRepository.save(mergedLoan);
+        this.loanRepository.save(loan);
 
         // Return response
-        return this.loanToLoanResponseConverter.convert(mergedLoan);
+        return this.loanToLoanResponseConverter.convert(loan);
     }
 
     @Override
@@ -222,7 +227,6 @@ public class LoanService implements ILoanService {
     private boolean isExistingBook(String id) {
         try {
             ResponseEntity<BookResponse> book = buscadorClient.getBook(id);
-            Logger.getGlobal().warning("MyText");
             return book != null;
         }
         catch(Exception e) {
@@ -230,10 +234,20 @@ public class LoanService implements ILoanService {
         }
     }
 
+    private BookResponse getBook(String id) {
+        try {
+            ResponseEntity<BookResponse> book = buscadorClient.getBook(id);
+            BookResponse response = book.getBody();
+            return response;
+        }
+        catch(Exception e) {
+            return null;
+        }
+    }
+
     private boolean isExistingClient(String id) {
         try {
             ResponseEntity<ClientResponse> client = buscadorClient.getClient(id);
-            Logger.getGlobal().warning("MyText");
             return client != null;
         }
         catch(Exception e) {
@@ -243,13 +257,7 @@ public class LoanService implements ILoanService {
 
     private boolean isValidSyntaxLoanForNulls(Loan loan)
     {
-        return loan.getBookId() != null
-                && loan.getClientId() != null
-                && loan.getLoanDate() != null
-                && loan.getReturnDate() != null
-                && loan.getDueDate() != null
-                && loan.getIsReturned() != null
-                && loan.getRenewalCount() != null;
+        return loan.getBookId() != null && loan.getClientId() != null;
     }
 
     private boolean isValidSyntaxLoanForZeroes(Loan loan)

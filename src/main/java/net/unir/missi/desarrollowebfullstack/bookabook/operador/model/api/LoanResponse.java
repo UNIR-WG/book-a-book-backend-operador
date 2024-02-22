@@ -2,6 +2,7 @@ package net.unir.missi.desarrollowebfullstack.bookabook.operador.model.api;
 
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Getter
@@ -14,9 +15,9 @@ public class LoanResponse {
     private Long id;
     private Long bookId;
     private Long clientId;
-    private Date loanDate;
-    private Date returnDate;
-    private Date dueDate;
+    private LocalDate loanDate;
+    private LocalDate returnDate;
+    private LocalDate dueDate;
     private Boolean isReturned;
     private Integer renewalCount;
 }

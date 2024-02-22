@@ -1,5 +1,6 @@
 package net.unir.missi.desarrollowebfullstack.bookabook.operador.model.sql;
 
+import java.time.LocalDate;
 import java.util.Date;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -32,11 +33,11 @@ public class Loan {
     @Column(name = "clientId")
     private Long clientId;
     @Column(name = "loanDate")
-    private Date loanDate;
+    private LocalDate loanDate;
     @Column(name = "returnDate")
-    private Date returnDate;
+    private LocalDate returnDate;
     @Column(name = "dueDate")
-    private Date dueDate;
+    private LocalDate dueDate;
     @Column(name = "isReturned")
     private Boolean isReturned;
     @Column(name = "renewalCount")
